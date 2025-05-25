@@ -14,8 +14,10 @@ class Puzzle:
         self.initial_state = initial_state
         self.goal_state = [0, 1, 2, 3, 4, 5, 6, 7, 8]  
         self.visited_states = set()
-        self.size = 3  # A dimensao do tabuleiro é 3x3
-        self.moves =  [(-1, 0), (1, 0), (0, -1), (0, 1)] # Movimentos possiveis
+        self.size = 3  
+        self.moves =  [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        self.queue = deque([(self.initial_state, [])])
+        self.visited_states.add(tuple(self.initial_state))
 
     def is_goal(self, state):
         return state == self.goal_state
@@ -27,7 +29,8 @@ class Puzzle:
     def get_neighbors(self, state):
         neighbors = []
         empty_pos = self.get_empty_position(state)
-        row, col = divmod(empty_pos,3)
+        
+        row, col = divmod(empty_pos,self.size)
 
         for dr, dc in self.moves:
             new_row, new_col = row + dr, col + dc
@@ -43,12 +46,9 @@ class Puzzle:
 
     def solve(self):
        
-        queue = deque([(self.initial_state, [])])
-        
-        self.visited_states.add(tuple(self.initial_state))
-
-        while queue:
-            current_state, path = queue.popleft()
+        while self.queue:
+                
+            current_state, path = self.queue.popleft()
 
             if self.is_goal(current_state):
                 return path, len(path)
@@ -57,7 +57,7 @@ class Puzzle:
                 neighbor_tuple = tuple(neighbor)
                 if neighbor_tuple not in self.visited_states:
                     self.visited_states.add(neighbor_tuple)
-                    queue.append((neighbor, path + [neighbor]))
+                    self.queue.append((neighbor, path + [neighbor]))
 
         return None, 0  
 
@@ -80,12 +80,12 @@ class Puzzle:
     
 
 if __name__ == "__main__":
-  
+
     initial_state_1 = [4, 6, 2, 8, 1, 3, 7, 5, 0] # Esse nao tem solução U_U
     initial_state_2 = [6, 4, 2, 8, 1, 3, 7, 5, 0]
     initial_state_3 = [1, 2, 3, 4, 5, 0, 6, 7, 8]
     initial_state_4 = [8, 7, 6, 5, 4, 3, 2, 1, 0]
 
-    puzzle = Puzzle(initial_state_1)
+    puzzle = Puzzle(initial_state_2)
     solution_path, steps = puzzle.solve()
     puzzle.print_solution(solution_path)
