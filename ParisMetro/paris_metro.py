@@ -90,7 +90,7 @@ def a_star(start: Station, end: Station) -> Tuple[List[Station], List[str], floa
             time_minutes = distance / speed_km_min
             
           
-            new_line = get_common_line(current_node.station, neighbor_station)
+            new_line = get_common_line(current_node.station, neighbor_station,current_node.current_line)
             line_change_penalty = 0
             if new_line is None:
                 

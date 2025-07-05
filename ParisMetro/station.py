@@ -43,11 +43,10 @@ DISTANCES = [
 ]
 
 LINES = {
-    'Linha 1': {Station.E1, Station.E2, Station.E3, Station.E4, Station.E5, Station.E6, Station.E7},
-    'Linha 2': {Station.E2, Station.E9, Station.E10},
-    'Linha 3': {Station.E3, Station.E9, Station.E11, Station.E12},
-    'Linha 4': {Station.E4, Station.E8, Station.E12, Station.E13, Station.E14},
-    'Linha 5': {Station.E5, Station.E7, Station.E8}
+    'Linha 1': {Station.E1, Station.E2, Station.E3, Station.E4, Station.E5, Station.E6},
+    'Linha 2': {Station.E10, Station.E2, Station.E9, Station.E8, Station.E5,Station.E7},
+    'Linha 3': {Station.E11, Station.E9, Station.E3, Station.E13},
+    'Linha 4': {Station.E12, Station.E8, Station.E4,Station.E13, Station.E14},
 }
 
 REAL_CONNECTIONS = [
@@ -77,7 +76,12 @@ def get_line(station: Station) -> str:
             return line
     return "Desconhecida"
 
-def get_common_line(station1: Station, station2: Station) -> Optional[str]:
+def get_common_line(station1: Station, station2: Station,current_line_str: str) -> Optional[str]:
+
+    if current_line_str:
+        current_line_stations = LINES.get(current_line_str, set())
+        if station1 in current_line_stations and station2 in current_line_stations:
+            return current_line_str
     
     for line, stations in LINES.items():
         if station1 in stations and station2 in stations:
