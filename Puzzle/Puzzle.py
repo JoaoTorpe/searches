@@ -86,6 +86,6 @@ if __name__ == "__main__":
     initial_state_3 = [1, 2, 3, 4, 5, 0, 6, 7, 8]
     initial_state_4 = [8, 7, 6, 5, 4, 3, 2, 1, 0]
 
-    puzzle = Puzzle(initial_state_2)
+    puzzle = Puzzle(initial_state_4)
     solution_path, steps = puzzle.solve()
     puzzle.print_solution(solution_path)

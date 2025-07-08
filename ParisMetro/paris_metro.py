@@ -50,24 +50,20 @@ def reconstruct_path(node: Node) -> Tuple[List[Station], List[str], int]:
     lines.reverse()
     
     
-    simplified_lines = []
-    for line in lines:
-        if not simplified_lines or line != simplified_lines[-1]:
-            simplified_lines.append(line)
+   
     
-    return path, simplified_lines, total_time
+    return path, lines, total_time
 
 def a_star(start: Station, end: Station) -> Tuple[List[Station], List[str], float]:
     
     open_set = []
     closed_set = set()
-    
- 
     best_nodes = {}
     
    
     initial_h = heuristic(start, end)
-    initial_node = Node(start, 0, initial_h, None, get_line(start))
+    initial_line = get_lines(start)[0] if get_lines(start) else None
+    initial_node = Node(start, 0, initial_h, None, initial_line)
     heapq.heappush(open_set, initial_node)
     best_nodes[start] = initial_node
     
@@ -84,21 +80,27 @@ def a_star(start: Station, end: Station) -> Tuple[List[Station], List[str], floa
             if neighbor_station in closed_set:
                 continue
             
-           
             speed_kmh = 30 
             speed_km_min = speed_kmh / 60 
             time_minutes = distance / speed_km_min
             
           
-            new_line = get_common_line(current_node.station, neighbor_station,current_node.current_line)
+            new_line = get_common_line(current_node.station, neighbor_station, current_node.current_line)
             line_change_penalty = 0
+
             if new_line is None:
-                
-                new_line = get_line(neighbor_station)
+                possible_lines = get_lines(neighbor_station)
+                if possible_lines:
+                    new_line = possible_lines[0]
+                    line_change_penalty = 5  
+                else:
+                    new_line = None
+            elif new_line != current_node.current_line:
                 line_change_penalty = 5  
             
             new_line_changes = current_node.line_changes + (1 if line_change_penalty > 0 else 0)
             
+                        
            
             new_g_cost = current_node.g_cost + time_minutes + line_change_penalty
             new_h_cost = heuristic(neighbor_station, end) / speed_km_min  
@@ -123,6 +125,68 @@ def a_star(start: Station, end: Station) -> Tuple[List[Station], List[str], floa
     
     raise ValueError(f"Não foi possível encontrar um caminho de {start} para {end}")
 
+
+def test_all_combinations():
+    """Testa todas combinações com tratamento robusto de encoding"""
+    all_stations = list(Station)
+    total = len(all_stations) * (len(all_stations) - 1)
+    tested = 0
+    errors = 0
+    
+    print("\n🔍 Testando todas combinações (arquivo 'resultados_metro.log')...")
+    
+    try:
+        with open("resultados_metro.log", "w", encoding="utf-8") as log_file:
+            log_file.write("RELATÓRIO DE TESTES - METRÔ PARIS\n")
+            log_file.write("="*50 + "\n\n")
+            
+            for start in all_stations:
+                for end in all_stations:
+                    if start == end:
+                        continue
+                    
+                    tested += 1
+                    print(f"Progresso: {tested}/{total} | Erros: {errors}", end="\r")
+                    
+                    try:
+                        path, lines, time = a_star(start, end)
+                        
+                     
+                        log_file.write(f"[OK] {start.name} -> {end.name} ({time:.1f} min)\n")
+                        log_file.write(" -> ".join(f"{s.name}({l})" for s,l in zip(path,lines)) + "\n")
+                        
+                      
+                        has_error = False
+                        for i, station in enumerate(path):
+                            if i < len(lines) and station not in LINES.get(lines[i], set()):
+                                has_error = True
+                                break
+                        
+                        if has_error:
+                            errors += 1
+                            log_file.write("[ERRO] Atribuição incorreta de linhas:\n")
+                            for i, station in enumerate(path):
+                                line = lines[i] if i < len(lines) else "?"
+                                valid = "(OK)" if station in LINES.get(line, set()) else f"(ERRO: válidas {get_lines(station)})"
+                                log_file.write(f"  {station.name}: {line} {valid}\n")
+                    
+                    except ValueError as e:
+                        errors += 1
+                        log_file.write(f"[FALHA] {start.name} -> {end.name}: {str(e)}\n")
+    
+    except Exception as e:
+        print(f"\n⚠️ Erro ao escrever arquivo: {str(e)}")
+        return
+
+
+    print(f"\n✔ Teste concluído!")
+    print(f"Total testado: {tested}")
+    print(f"Rotas com problemas: {errors}")
+    print(f"Arquivo completo: resultados_metro.log")
+    
+    if errors > 0:
+        print("\nDica: Use um editor como Notepad++ ou VS Code para ver o arquivo .log")
+
 def print_path(path: List[Station], lines: List[str], total_time: float):
     
     print("\nCaminho encontrado:")
@@ -133,7 +197,7 @@ def print_path(path: List[Station], lines: List[str], total_time: float):
         print(f"{station.name}{line_info}")
     
     print(f"\nTempo total da viagem: {total_time:.1f} minutos")
-    print(f"Número de mudanças de linha: {len(lines)-1}")
+
 
 def main():
     print("Sistema de Navegação do Metrô de Paris")
@@ -145,7 +209,6 @@ def main():
             end = Station.from_str(input("Digite a estação de destino (ex: E14): "))
             
             if start == end:
-                print("Origem e destino são iguais. Não é necessária viagem.")
                 continue
                 
             path, lines, total_time = a_star(start, end)
@@ -159,4 +222,5 @@ def main():
             break
 
 if __name__ == "__main__":
-    main()
+   ## main()
+   test_all_combinations()

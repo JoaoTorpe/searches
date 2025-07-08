@@ -69,21 +69,16 @@ REAL_CONNECTIONS = [
     (Station.E13, Station.E14, 5)
 ]
 
-def get_line(station: Station) -> str:
-   
-    for line, stations in LINES.items():
-        if station in stations:
-            return line
-    return "Desconhecida"
+def get_lines(station: Station) -> List[str]:
+    return [line for line, stations in LINES.items() if station in stations]
 
-def get_common_line(station1: Station, station2: Station,current_line_str: str) -> Optional[str]:
-
-    if current_line_str:
-        current_line_stations = LINES.get(current_line_str, set())
-        if station1 in current_line_stations and station2 in current_line_stations:
-            return current_line_str
+def get_common_line(station1: Station, station2: Station, current_line: str) -> Optional[str]:
+    if current_line:
+        if station1 in LINES[current_line] and station2 in LINES[current_line]:
+            return current_line
     
-    for line, stations in LINES.items():
-        if station1 in stations and station2 in stations:
+    for line in LINES:
+        if station1 in LINES[line] and station2 in LINES[line]:
             return line
+    
     return None
