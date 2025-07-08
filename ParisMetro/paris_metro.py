@@ -133,7 +133,7 @@ def test_all_combinations():
     tested = 0
     errors = 0
     
-    print("\n🔍 Testando todas combinações (arquivo 'resultados_metro.log')...")
+    print("\n Testando todas combinações (arquivo 'resultados_metro.log')...")
     
     try:
         with open("resultados_metro.log", "w", encoding="utf-8") as log_file:
@@ -175,11 +175,11 @@ def test_all_combinations():
                         log_file.write(f"[FALHA] {start.name} -> {end.name}: {str(e)}\n")
     
     except Exception as e:
-        print(f"\n⚠️ Erro ao escrever arquivo: {str(e)}")
+        print(f"\n Erro ao escrever arquivo: {str(e)}")
         return
 
 
-    print(f"\n✔ Teste concluído!")
+    print(f"\nTeste concluído!")
     print(f"Total testado: {tested}")
     print(f"Rotas com problemas: {errors}")
     print(f"Arquivo completo: resultados_metro.log")
@@ -199,28 +199,6 @@ def print_path(path: List[Station], lines: List[str], total_time: float):
     print(f"\nTempo total da viagem: {total_time:.1f} minutos")
 
 
-def main():
-    print("Sistema de Navegação do Metrô de Paris")
-    print("Estações disponíveis: E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14")
-    
-    while True:
-        try:
-            start = Station.from_str(input("\nDigite a estação de origem (ex: E1): "))
-            end = Station.from_str(input("Digite a estação de destino (ex: E14): "))
-            
-            if start == end:
-                continue
-                
-            path, lines, total_time = a_star(start, end)
-            print_path(path, lines, total_time)
-            
-        except ValueError as e:
-            print(f"Erro: {e}")
-        
-        again = input("\nDeseja consultar outra rota? (s/n): ").lower()
-        if again != 's':
-            break
-
 if __name__ == "__main__":
-   ## main()
+   
    test_all_combinations()
